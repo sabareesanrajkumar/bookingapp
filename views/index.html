@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking App</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>BOOKING APP</h1>
+    <form id="user-form">
+        <input type="text" name="username" id="username" placeholder="User Name">
+        <input type="number" name="phonenumber" id="phonenumber" placeholder="Phone Number">
+        <input type="email" name="email" id="email" placeholder="email">
+        <button type="submit">SIGN IN</button>
+    </form>
+    <div id="users"></div>
+
+
+
+    <script>
+        document.getElementById('user-form').addEventListener('submit',async (event)=>{
+            event.preventDefault();
+            const formData = {
+                username: event.target.username.value,
+                phonenumber: event.target.phonenumber.value,
+                email: event.target.email.value
+            }
+            const submitResponse = await axios.post('http://localhost:3000/users',formData);
+            resetForm();
+            getUsers();
+        })
+
+        function resetForm(){
+            document.getElementById('username').value = '';
+            document.getElementById('phonenumber').value = '';
+            document.getElementById('email').value = '';    
+        }
+
+        async function getUsers(){
+            const usersContainer = document.getElementById('users');
+            const getUserResponse = await axios.get('http://localhost:3000/users');
+            usersContainer.innerHTML = ``;
+            getUserResponse.data.forEach(user => {
+                const userData = document.createElement('p');
+                userData.innerHTML=`
+                ${user.username} - ${user.phonenumber} - ${user.email}
+                <button onclick = deleteUser(${user.id})>Delete</button>
+                <button onclick = editUser(${user.id})>Edit</button>
+                `;
+                usersContainer.append(userData);
+            });
+        }
+
+        async function deleteUser(id){
+            await axios.delete(`http://localhost:3000/users/delete/${id}`);
+            getUsers();
+
+
+        }
+
+        
+        async function editUser(id){
+            const editResponse = axios.put(`http://localhost:3000/users/edit/${id}`);
+            
+        }
+
+        window.onload = getUsers();
+    </script>
+    
+</body>
+</html>
